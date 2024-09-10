@@ -1,0 +1,35 @@
+# Version of Docker Compose file
+version: '3'
+
+# Defines services that will be part of application
+services:
+  web:
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE                # Only required capabilities
+    build: .                            # Build the docker image using the Dockerfile in current directory
+    ports:
+      - "5000:5000"                     # Map port 5000 of container to port 5000 on the host machine
+    networks:
+      - my-custom-network
+    volumes:
+      - ./secret.txt:/run/secrets/secret_key:ro  # Mount the secret file in read-only mode
+      - app_data:/app/data               # Named volume for persistent data storage
+      - ./logs:/app/logs                 # Bind mount to store logs on host machine
+
+  redis:
+    image: "redis:alpine"                # Use official Redis image with Alpine version
+    networks:
+      - my-custom-network
+    volumes:
+      - redis_data:/data                 # Named volume for Redis data
+
+networks:
+  my-custom-network:
+    driver: bridge                       # Using bridge driver for a custom network
+
+volumes:
+  app_data:
+  redis_data:
+
